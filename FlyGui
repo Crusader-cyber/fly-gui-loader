@@ -1,0 +1,98 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer or Players.PlayerAdded:Wait()
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Create ScreenGui
+local flyGui = Instance.new("ScreenGui")
+flyGui.Name = "FlyGui"
+flyGui.ResetOnSpawn = false
+flyGui.Parent = playerGui
+
+-- Fly Button
+local flyButton = Instance.new("TextButton")
+flyButton.Name = "FlyButton"
+flyButton.Size = UDim2.new(0, 150, 0, 50)
+flyButton.Position = UDim2.new(0, 50, 0, 50)
+flyButton.Text = "Fly"
+flyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+flyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyButton.Parent = flyGui
+
+-- Speed Button
+local speedButton = Instance.new("TextButton")
+speedButton.Name = "SpeedButton"
+speedButton.Size = UDim2.new(0, 150, 0, 50)
+speedButton.Position = UDim2.new(0, 50, 0, 120)
+speedButton.Text = "Speed"
+speedButton.BackgroundColor3 = Color3.fromRGB(0, 255, 127)
+speedButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedButton.Parent = flyGui
+
+-- Fly logic
+local flying = false
+local flySpeed = 50
+local bodyVelocity
+
+local function startFly()
+    if flying then return end
+    flying = true
+    bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(1e5,1e5,1e5)
+    bodyVelocity.Velocity = Vector3.new(0,0,0)
+    bodyVelocity.Parent = rootPart
+    flyButton.Text = "Flying!"
+
+    RunService.RenderStepped:Connect(function()
+        if not flying or not bodyVelocity then return end
+        local cam = workspace.CurrentCamera
+        local moveDir = Vector3.new()
+        if player:GetMouse().KeyDown:wait() then
+            -- Optional: Add WASD movement here
+        end
+        bodyVelocity.Velocity = Vector3.new(0,0,0) + cam.CFrame.LookVector * flySpeed
+    end)
+end
+
+local function stopFly()
+    flying = false
+    if bodyVelocity then
+        bodyVelocity:Destroy()
+        bodyVelocity = nil
+    end
+    flyButton.Text = "Fly"
+end
+
+flyButton.MouseButton1Click:Connect(function()
+    if flying then
+        stopFly()
+    else
+        startFly()
+    end
+end)
+
+-- Speed boost logic
+local speedBoosted = false
+local defaultSpeed = humanoid.WalkSpeed
+
+speedButton.MouseButton1Click:Connect(function()
+    speedBoosted = not speedBoosted
+    if speedBoosted then
+        humanoid.WalkSpeed = defaultSpeed * 2
+        speedButton.Text = "Speed On"
+    else
+        humanoid.WalkSpeed = defaultSpeed
+        speedButton.Text = "Speed"
+    end
+end)
+
+-- Reset humanoid and rootPart on respawn
+player.CharacterAdded:Connect(function(char)
+    character = char
+    humanoid = character:WaitForChild("Humanoid")
+    rootPart = character:WaitForChild("HumanoidRootPart")
+end)
