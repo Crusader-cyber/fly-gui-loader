@@ -1,0 +1,479 @@
+--[[
+    Admin Panel Script (Updated with Close & Minimize)
+    Made By: Eclipze🌠
+    Type: LocalScript
+]]
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+-- // UI CREATION \\ --
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "EclipzeAdminPanel"
+ScreenGui.ResetOnSpawn = false 
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+-- // MINIMIZE BUTTON (The Small Square) \\ --
+-- We create this first so we can reference it later
+local OpenButton = Instance.new("TextButton")
+OpenButton.Name = "OpenButton"
+OpenButton.Size = UDim2.new(0, 50, 0, 50)
+OpenButton.Position = UDim2.new(0, 20, 1, -70) -- Bottom Left
+OpenButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+OpenButton.Text = "Open"
+OpenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+OpenButton.Font = Enum.Font.GothamBold
+OpenButton.TextSize = 12
+OpenButton.Visible = false -- Hidden by default
+OpenButton.Parent = ScreenGui
+
+local OpenCorner = Instance.new("UICorner")
+OpenCorner.CornerRadius = UDim.new(0, 8)
+OpenCorner.Parent = OpenButton
+
+-- // MAIN PANEL \\ --
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 450, 0, 350)
+MainFrame.Position = UDim2.new(0.5, -225, 0.5, -175)
+MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35) 
+MainFrame.BorderSizePixel = 0
+MainFrame.Parent = ScreenGui
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = MainFrame
+
+-- // CONTROL BUTTONS (X and -) \\ --
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Name = "CloseButton"
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -35, 0, 5) -- Top Right
+CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50) -- Red
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 16
+CloseBtn.Parent = MainFrame
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 6)
+CloseCorner.Parent = CloseBtn
+
+local MinBtn = Instance.new("TextButton")
+MinBtn.Name = "MinButton"
+MinBtn.Size = UDim2.new(0, 30, 0, 30)
+MinBtn.Position = UDim2.new(1, -70, 0, 5) -- Next to Close
+MinBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80) -- Gray
+MinBtn.Text = "-"
+MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinBtn.Font = Enum.Font.GothamBold
+MinBtn.TextSize = 20
+MinBtn.Parent = MainFrame
+
+local MinCorner = Instance.new("UICorner")
+MinCorner.CornerRadius = UDim.new(0, 6)
+MinCorner.Parent = MinBtn
+
+-- // TITLE SECTION \\ --
+
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Size = UDim2.new(1, -80, 0, 40) -- Adjusted width to not overlap buttons
+Title.Position = UDim2.new(0, 10, 0, 10)
+Title.BackgroundTransparency = 1
+Title.Text = "Admin Panel"
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 30
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = MainFrame
+
+local SubTitle = Instance.new("TextLabel")
+SubTitle.Name = "SubTitle"
+SubTitle.Size = UDim2.new(1, 0, 0, 20)
+SubTitle.Position = UDim2.new(0, 10, 0, 45)
+SubTitle.BackgroundTransparency = 1
+SubTitle.Text = "Made By: Eclipze🌠"
+SubTitle.Font = Enum.Font.Gotham
+SubTitle.TextSize = 14
+SubTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+SubTitle.TextXAlignment = Enum.TextXAlignment.Left
+SubTitle.Parent = MainFrame
+
+-- // TABS CONTAINER \\ --
+
+local TabButtonsFrame = Instance.new("Frame")
+TabButtonsFrame.Size = UDim2.new(1, -20, 0, 35)
+TabButtonsFrame.Position = UDim2.new(0, 10, 0, 75)
+TabButtonsFrame.BackgroundTransparency = 1
+TabButtonsFrame.Parent = MainFrame
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.FillDirection = Enum.FillDirection.Horizontal
+UIListLayout.Padding = UDim.new(0, 10)
+UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIListLayout.Parent = TabButtonsFrame
+
+local function createTabButton(text)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 130, 1, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 14
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = btn
+    
+    return btn
+end
+
+local GenTabBtn = createTabButton("General")
+GenTabBtn.Parent = TabButtonsFrame
+
+local SetTabBtn = createTabButton("Settings")
+SetTabBtn.Parent = TabButtonsFrame
+
+local CredTabBtn = createTabButton("Credits")
+CredTabBtn.Parent = TabButtonsFrame
+
+-- // PAGES CONTAINER \\ --
+
+local PagesContainer = Instance.new("Frame")
+PagesContainer.Size = UDim2.new(1, -20, 1, -125)
+PagesContainer.Position = UDim2.new(0, 10, 0, 115)
+PagesContainer.BackgroundTransparency = 1
+PagesContainer.Parent = MainFrame
+
+local GeneralPage = Instance.new("Frame")
+GeneralPage.Size = UDim2.new(1, 0, 1, 0)
+GeneralPage.BackgroundTransparency = 1
+GeneralPage.Visible = true 
+GeneralPage.Parent = PagesContainer
+
+local SettingsPage = Instance.new("Frame")
+SettingsPage.Size = UDim2.new(1, 0, 1, 0)
+SettingsPage.BackgroundTransparency = 1
+SettingsPage.Visible = false
+SettingsPage.Parent = PagesContainer
+
+local CreditsPage = Instance.new("Frame")
+CreditsPage.Size = UDim2.new(1, 0, 1, 0)
+CreditsPage.BackgroundTransparency = 1
+CreditsPage.Visible = false
+CreditsPage.Parent = PagesContainer
+
+-- // GENERAL PAGE CONTENT \\ --
+
+local FlyButton = Instance.new("TextButton")
+FlyButton.Size = UDim2.new(0, 150, 0, 40)
+FlyButton.Position = UDim2.new(0.5, -75, 0, 10)
+FlyButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+FlyButton.Text = "Fly: OFF"
+FlyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+FlyButton.Font = Enum.Font.GothamBold
+FlyButton.TextSize = 16
+FlyButton.Parent = GeneralPage
+
+local FlyCorner = Instance.new("UICorner")
+FlyCorner.CornerRadius = UDim.new(0, 6)
+FlyCorner.Parent = FlyButton
+
+local WSLabel = Instance.new("TextLabel")
+WSLabel.Size = UDim2.new(1, 0, 0, 20)
+WSLabel.Position = UDim2.new(0, 0, 0, 80)
+WSLabel.BackgroundTransparency = 1
+WSLabel.Text = "WalkSpeed (16 - 100)"
+WSLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+WSLabel.Font = Enum.Font.Gotham
+WSLabel.TextSize = 14
+WSLabel.Parent = GeneralPage
+
+local WSInput = Instance.new("TextBox")
+WSInput.Size = UDim2.new(0, 100, 0, 35)
+WSInput.Position = UDim2.new(0.5, -110, 0, 105)
+WSInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+WSInput.Text = "16"
+WSInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+WSInput.Font = Enum.Font.Gotham
+WSInput.TextSize = 14
+WSInput.Parent = GeneralPage
+
+local WSCorner = Instance.new("UICorner")
+WSCorner.Parent = WSInput
+
+local WSSetBtn = Instance.new("TextButton")
+WSSetBtn.Size = UDim2.new(0, 100, 0, 35)
+WSSetBtn.Position = UDim2.new(0.5, 10, 0, 105)
+WSSetBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+WSSetBtn.Text = "Set Speed"
+WSSetBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+WSSetBtn.Font = Enum.Font.GothamBold
+WSSetBtn.TextSize = 14
+WSSetBtn.Parent = GeneralPage
+
+local WSSCorner = Instance.new("UICorner")
+WSSCorner.Parent = WSSetBtn
+
+-- // SETTINGS PAGE CONTENT \\ --
+
+local ThemeBtn = Instance.new("TextButton")
+ThemeBtn.Size = UDim2.new(0, 200, 0, 50)
+ThemeBtn.Position = UDim2.new(0.5, -100, 0.5, -25)
+ThemeBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+ThemeBtn.Text = "Mode: Dark"
+ThemeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ThemeBtn.Font = Enum.Font.GothamBold
+ThemeBtn.TextSize = 18
+ThemeBtn.Parent = SettingsPage
+
+local ThemeCorner = Instance.new("UICorner")
+ThemeCorner.Parent = ThemeBtn
+
+-- // CREDITS PAGE CONTENT \\ --
+
+local Credit1 = Instance.new("TextLabel")
+Credit1.Size = UDim2.new(1, 0, 0, 30)
+Credit1.Position = UDim2.new(0, 0, 0.3, 0)
+Credit1.BackgroundTransparency = 1
+Credit1.Text = "Made By: Eclipze"
+Credit1.Font = Enum.Font.GothamBold
+Credit1.TextSize = 24
+Credit1.TextColor3 = Color3.fromRGB(255, 255, 255)
+Credit1.Parent = CreditsPage
+
+local Credit2 = Instance.new("TextLabel")
+Credit2.Size = UDim2.new(1, -20, 0, 50)
+Credit2.Position = UDim2.new(0, 10, 0.5, 0)
+Credit2.BackgroundTransparency = 1
+Credit2.Text = "If you want more scripts like this please let us know!"
+Credit2.Font = Enum.Font.Gotham
+Credit2.TextSize = 16
+Credit2.TextColor3 = Color3.fromRGB(200, 200, 200)
+Credit2.TextWrapped = true
+Credit2.Parent = CreditsPage
+
+-- // LOGIC & SCRIPTING \\ --
+
+-- CLOSE & MINIMIZE LOGIC
+CloseBtn.MouseButton1Click:Connect(function()
+    ScreenGui.Enabled = false -- Completely Hides GUI (Toggle with Right Ctrl if needed)
+end)
+
+MinBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    OpenButton.Visible = true
+end)
+
+OpenButton.MouseButton1Click:Connect(function()
+    OpenButton.Visible = false
+    MainFrame.Visible = true
+end)
+
+-- Tab Switching
+local function SwitchTab(page)
+    GeneralPage.Visible = false
+    SettingsPage.Visible = false
+    CreditsPage.Visible = false
+    page.Visible = true
+end
+
+GenTabBtn.MouseButton1Click:Connect(function() SwitchTab(GeneralPage) end)
+SetTabBtn.MouseButton1Click:Connect(function() SwitchTab(SettingsPage) end)
+CredTabBtn.MouseButton1Click:Connect(function() SwitchTab(CreditsPage) end)
+
+-- Draggable GUI
+local dragging, dragInput, dragStart, startPos
+
+local function update(input)
+    local delta = input.Position - dragStart
+    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+MainFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
+
+-- WalkSpeed Logic
+WSSetBtn.MouseButton1Click:Connect(function()
+    local val = tonumber(WSInput.Text)
+    if val then
+        if val >= 16 and val <= 100 then
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChild("Humanoid") then
+                char.Humanoid.WalkSpeed = val
+            end
+        else
+            WSInput.Text = "16-100 Only"
+        end
+    else
+        WSInput.Text = "Invalid"
+    end
+end)
+
+-- Fly Logic
+local flying = false
+local flySpeed = 50
+local flyconnection
+
+FlyButton.MouseButton1Click:Connect(function()
+    flying = not flying
+    
+    local char = LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then 
+        flying = false 
+        return 
+    end
+    
+    local hrp = char.HumanoidRootPart
+    local humanoid = char.Humanoid
+    
+    if flying then
+        FlyButton.Text = "Fly: ON"
+        FlyButton.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+        
+        local bodyGyro = Instance.new("BodyGyro")
+        bodyGyro.P = 9e4
+        bodyGyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+        bodyGyro.CFrame = hrp.CFrame
+        bodyGyro.Parent = hrp
+        
+        local bodyVel = Instance.new("BodyVelocity")
+        bodyVel.velocity = Vector3.new(0,0,0)
+        bodyVel.maxForce = Vector3.new(9e9, 9e9, 9e9)
+        bodyVel.Parent = hrp
+        
+        humanoid.PlatformStand = true
+        
+        flyconnection = RunService.RenderStepped:Connect(function()
+            if not flying or not char.Parent then
+                if bodyGyro then bodyGyro:Destroy() end
+                if bodyVel then bodyVel:Destroy() end
+                humanoid.PlatformStand = false
+                if flyconnection then flyconnection:Disconnect() end
+                return
+            end
+            
+            bodyGyro.CFrame = workspace.CurrentCamera.CFrame
+            
+            local moveDir = Vector3.new()
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + (workspace.CurrentCamera.CFrame.LookVector) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - (workspace.CurrentCamera.CFrame.LookVector) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - (workspace.CurrentCamera.CFrame.RightVector) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + (workspace.CurrentCamera.CFrame.RightVector) end
+            
+            bodyVel.Velocity = moveDir * flySpeed
+        end)
+    else
+        FlyButton.Text = "Fly: OFF"
+        FlyButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        
+        if hrp:FindFirstChild("BodyVelocity") then hrp.BodyVelocity:Destroy() end
+        if hrp:FindFirstChild("BodyGyro") then hrp.BodyGyro:Destroy() end
+        humanoid.PlatformStand = false
+        if flyconnection then flyconnection:Disconnect() end
+    end
+end)
+
+-- Dark/Light Mode
+local isDarkMode = true
+
+local function updateTheme()
+    if isDarkMode then
+        -- Dark Theme
+        MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+        SubTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+        
+        GenTabBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        GenTabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        SetTabBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        SetTabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        CredTabBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        CredTabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        
+        WSLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        WSInput.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        WSInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+        
+        ThemeBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        ThemeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        ThemeBtn.Text = "Mode: Dark"
+        
+        Credit1.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Credit2.TextColor3 = Color3.fromRGB(200, 200, 200)
+        
+        OpenButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        OpenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    else
+        -- Light Theme
+        MainFrame.BackgroundColor3 = Color3.fromRGB(235, 235, 235)
+        Title.TextColor3 = Color3.fromRGB(30, 30, 30)
+        SubTitle.TextColor3 = Color3.fromRGB(60, 60, 60)
+        
+        GenTabBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+        GenTabBtn.TextColor3 = Color3.fromRGB(30, 30, 30)
+        SetTabBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+        SetTabBtn.TextColor3 = Color3.fromRGB(30, 30, 30)
+        CredTabBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+        CredTabBtn.TextColor3 = Color3.fromRGB(30, 30, 30)
+        
+        WSLabel.TextColor3 = Color3.fromRGB(30, 30, 30)
+        WSInput.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        WSInput.TextColor3 = Color3.fromRGB(0, 0, 0)
+        
+        ThemeBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+        ThemeBtn.TextColor3 = Color3.fromRGB(30, 30, 30)
+        ThemeBtn.Text = "Mode: Light"
+        
+        Credit1.TextColor3 = Color3.fromRGB(30, 30, 30)
+        Credit2.TextColor3 = Color3.fromRGB(60, 60, 60)
+        
+        OpenButton.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+        OpenButton.TextColor3 = Color3.fromRGB(30, 30, 30)
+    end
+end
+
+ThemeBtn.MouseButton1Click:Connect(function()
+    isDarkMode = not isDarkMode
+    updateTheme()
+end)
+
+-- Keybind to open if closed with X
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if not gpe and input.KeyCode == Enum.KeyCode.RightControl then
+        ScreenGui.Enabled = not ScreenGui.Enabled
+    end
+end)
+
+print("Admin Panel Loaded - Made by Eclipze")
