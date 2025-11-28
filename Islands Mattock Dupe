@@ -1,0 +1,103 @@
+--[[ 
+    Islands Duper GUI (voidMattock Edition)
+    Made By: Eclipze 🌠 
+]]
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- 1. Create the GUI Container
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "IslandsDuperGUI"
+ScreenGui.ResetOnSpawn = false
+-- Try to parent to CoreGui (if executor) or PlayerGui (if regular studio)
+pcall(function() ScreenGui.Parent = game:GetService("CoreGui") end)
+if not ScreenGui.Parent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
+
+-- 2. Create the Main Background Frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 300, 0, 200)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -100) -- Centered on screen
+MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35) -- Dark Grey
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true -- Allows you to drag the GUI around
+MainFrame.Parent = ScreenGui
+
+-- Add rounded corners for looks
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = MainFrame
+
+-- 3. Create "Islands Duper" Big Text
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Name = "Title"
+TitleLabel.Size = UDim2.new(1, 0, 0, 50)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = "Islands Duper"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextSize = 30
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.Parent = MainFrame
+
+-- 4. Create "Made By: Eclipze 🌠" Small Text
+local CreditsLabel = Instance.new("TextLabel")
+CreditsLabel.Name = "Credits"
+CreditsLabel.Size = UDim2.new(1, 0, 0, 20)
+CreditsLabel.Position = UDim2.new(0, 0, 0, 45)
+CreditsLabel.BackgroundTransparency = 1
+CreditsLabel.Text = "Made By: Eclipze 🌠"
+CreditsLabel.TextColor3 = Color3.fromRGB(170, 170, 170) -- Light Grey
+CreditsLabel.TextSize = 14
+CreditsLabel.Font = Enum.Font.Gotham
+CreditsLabel.Parent = MainFrame
+
+-- 5. Create the "Dupe" Button
+local DupeButton = Instance.new("TextButton")
+DupeButton.Name = "DupeButton"
+DupeButton.Size = UDim2.new(0, 200, 0, 50)
+DupeButton.Position = UDim2.new(0.5, -100, 0.7, -25)
+DupeButton.BackgroundColor3 = Color3.fromRGB(0, 120, 215) -- Blue
+DupeButton.Text = "Dupe"
+DupeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+DupeButton.TextSize = 24
+DupeButton.Font = Enum.Font.GothamBold
+DupeButton.Parent = MainFrame
+
+-- Button Rounded Corners
+local ButtonCorner = Instance.new("UICorner")
+ButtonCorner.CornerRadius = UDim.new(0, 8)
+ButtonCorner.Parent = DupeButton
+
+-- 6. The Logic Script
+DupeButton.MouseButton1Click:Connect(function()
+    -- Look for the item in Backpack (unequipped) or Character (equipped)
+    local targetItemName = "voidMattock"
+    local item = LocalPlayer.Backpack:FindFirstChild(targetItemName) 
+        or (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(targetItemName))
+
+    if item then
+        local amountValue = item:FindFirstChild("Amount")
+        
+        if amountValue and amountValue:IsA("IntValue") then
+            -- INCREMENT THE VALUE
+            amountValue.Value = amountValue.Value + 1
+            
+            -- Optional: Visual feedback on button
+            DupeButton.Text = "Success! (" .. amountValue.Value .. ")"
+            wait(0.5)
+            DupeButton.Text = "Dupe"
+        else
+            warn("Found " .. targetItemName .. ", but could not find 'Amount' IntValue inside it.")
+            DupeButton.Text = "Error: No Amount Found"
+            wait(1)
+            DupeButton.Text = "Dupe"
+        end
+    else
+        warn("Could not find " .. targetItemName .. " in Backpack or Character.")
+        DupeButton.Text = "Item Not Found"
+        wait(1)
+        DupeButton.Text = "Dupe"
+    end
+end)
